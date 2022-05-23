@@ -1,8 +1,7 @@
 # Robustness Evaluation of Deep Unsupervised Learning Algorithms for Intrusion Detection Systems
 This repository collects different unsupervised machine learning algorithms to detect anomalies.
 ## Implemented models
-We have implemented the following models. Our implementations of ALAD, DeepSVDD, 
-DROCC and MemAE closely follows the original implementations already available on GitHub.
+We have implemented the following models. Our implementations of ALAD closely follows the original implementations already available on GitHub.
 - [x] [AutoEncoder]()
 - [x] [ALAD](https://arxiv.org/abs/1812.02288)
 - [x] [DAGMM](https://sites.cs.ucsb.edu/~bzong/doc/iclr18-dagmm.pdf)
