@@ -3,7 +3,6 @@ from sklearn.cluster import KMeans
 
 class BPA:
 
-    
     def __init__(self, E):
         self.__E = E
         self.__interpretation = {0:'Normal', 1:'Uncertain' , 2:'Abnormal'}
