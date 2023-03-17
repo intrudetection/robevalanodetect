@@ -1,30 +1,23 @@
-import numpy as np
-from sklearn.cluster import KMeans
+from pyds import MassFunction
 
 class DSAddOn:
 
-    
-    def __init__(self, E):
-        self.__E = E
-        self.__interpretation = {0:'Normal', 1:'Uncertain' , 2:'Abnormal'}
+    def __init__(self, bpas):
+        self.__bpas = bpas.copy()
         
-    def set_class_centroid_error(self):
-        E = self.__E.reshape((-1, 1))
-        kmeans = KMeans(n_clusters=3, random_state=0).fit(E)
-        centroids = kmeans.cluster_centers_.reshape((1, -1))[0]
-        centroids.sort()
-        self.__centroids = centroids.copy()
     
-    def __softmax(self, z):
-        assert len(z.shape) == 2
-        s = np.max(z, axis=1)
-        s = s[:, np.newaxis]
-        e_x = np.exp(z - s)
-        div = np.sum(e_x, axis=1)
-        div = div[:, np.newaxis]
-        return e_x / div 
+    def set_mass(self):
+        self.__masses = []
+        for bpa in self.__bpas:
+            mass = MassFunction({'n':bpa[0], 'na':bpa[1], 'a':bpa[2]}) 
+            self.__masses.append(mass)
+    
+    
+    def predict(self):
+        assert len(self.__masses) >= 1
         
-    def predict(self, e_x):
-        x = np.array([[abs(e_x-c) for c in self.__centroids]])
-        pred = self.__softmax(-x)
-        return pred, self.__interpretation[np.argmax(pred)]
+        bpa = self.__masses[0]
+        if len(self.__masses) > 1:
+            bpa = bpa.combine_conjunctive([m for m in self.__masses[1:]], normalization = True)
+            
+        return bpa, bpa.pl()
