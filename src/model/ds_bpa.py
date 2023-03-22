@@ -1,11 +1,14 @@
 import numpy as np
 from sklearn.cluster import KMeans
+from scipy.special import softmax
+from sklearn import preprocessing
 
 class BPA:
 
     def __init__(self, E):
         self.__E = E
         self.__interpretation = {0:'Normal', 1:'Uncertain' , 2:'Abnormal'}
+        self.__feature_range = (60, 65)
         
     def set_class_centroid_error(self):
         E = self.__E.reshape((-1, 1))
@@ -14,16 +17,12 @@ class BPA:
         centroids.sort()
         self.__centroids = centroids.copy()
     
-    def __softmax(self, z):
-        assert len(z.shape) == 2
-        s = np.max(z, axis=1)
-        s = s[:, np.newaxis]
-        e_x = np.exp(z - s)
-        div = np.sum(e_x, axis=1)
-        div = div[:, np.newaxis]
-        return e_x / div 
+    def getC(self):
+    	return self.__centroids
         
     def predict(self, e_x):
-        x = np.array([[abs(e_x-c) for c in self.__centroids]])
-        pred = self.__softmax(-x)
+        x = np.array([abs(e_x-c) for c in self.__centroids])
+        scaler = preprocessing.MinMaxScaler(feature_range = self.__feature_range)
+        z = scaler.fit_transform(x.reshape((-1, 1)))
+        pred = softmax(-z)
         return pred, self.__interpretation[np.argmax(pred)]
