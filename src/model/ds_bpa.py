@@ -5,10 +5,11 @@ from sklearn import preprocessing
 
 class BPA:
 
-    def __init__(self, E):
+    def __init__(self, E, q = 0.2):
         self.__E = E
         self.__interpretation = {0:'Normal', 1:'Uncertain' , 2:'Abnormal'}
         self.__feature_range = (60, 65)
+        self.__q = q
         
     def set_class_centroid_error(self):
         E = self.__E.reshape((-1, 1))
@@ -19,10 +20,19 @@ class BPA:
     
     def getC(self):
     	return self.__centroids
-        
-    def predict(self, e_x):
+    
+    def predict_prob(self, e_x):
         x = np.array([abs(e_x-c) for c in self.__centroids])
         scaler = preprocessing.MinMaxScaler(feature_range = self.__feature_range)
         z = scaler.fit_transform(x.reshape((-1, 1)))
-        pred = softmax(-z)
-        return pred, self.__interpretation[np.argmax(pred)]
+        self.__pred = softmax(-z).reshape((1, -1))[0]
+        return self.__pred
+        
+    def predict_label(self):
+        pred = self.__pred.copy()
+        pred[1] = pred[-1]
+        pred[-1] = -1
+        return np.argmax(pred)
+    
+    def predict_inter(self):
+        return self.__interpretation[np.argmax(self.__pred)], 'high' if self.__pred[1] > self.__q else 'low'
