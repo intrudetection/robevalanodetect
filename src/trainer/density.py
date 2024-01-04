@@ -17,9 +17,9 @@ class DSEBMTrainer(BaseTrainer):
         super(DSEBMTrainer, self).__init__(**kwargs)
         self.score_metric = score_metric
         self.criterion = nn.BCEWithLogitsLoss()
-        self.b_prime = Parameter(torch.Tensor(self.batch_size, self.model.in_features).to(self.device))
-        torch.nn.init.xavier_normal_(self.b_prime)
-        self.optim = optim.Adam(
+        self.b_prime = Parameter(torch.Tensor(self.model.in_features).to(self.device))
+        torch.nn.init.normal_(self.b_prime)
+        self.optimizer = optim.Adam(
             list(self.model.parameters()) + [self.b_prime],
             lr=self.lr, betas=(0.5, 0.999)
         )
@@ -38,7 +38,7 @@ class DSEBMTrainer(BaseTrainer):
     def score(self, sample: torch.Tensor):
         # Evaluation of the score based on the energy
         with torch.no_grad():
-            flat = sample - self.b_prime
+            flat = sample - self.b_prime.expand_as(sample)
             out = self.model(sample)
             energies = 0.5 * torch.sum(torch.square(flat), dim=1) - torch.sum(out, dim=1)
 
@@ -94,4 +94,4 @@ class DSEBMTrainer(BaseTrainer):
         return out
 
     def energy(self, X, X_hat):
-        return 0.5 * torch.sum(torch.square(X - self.b_prime)) - torch.sum(X_hat)
+        return 0.5 * torch.sum(torch.square(X - self.b_prime.expand_as(X))) - torch.sum(X_hat)
