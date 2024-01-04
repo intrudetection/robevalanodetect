@@ -19,7 +19,7 @@ class DSEBMTrainer(BaseTrainer):
         self.criterion = nn.BCEWithLogitsLoss()
         self.b_prime = Parameter(torch.Tensor(self.model.in_features).to(self.device))
         torch.nn.init.normal_(self.b_prime)
-        self.optim = optim.Adam(
+        self.optimizer = optim.Adam(
             list(self.model.parameters()) + [self.b_prime],
             lr=self.lr, betas=(0.5, 0.999)
         )
